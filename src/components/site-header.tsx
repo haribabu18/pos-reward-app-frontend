@@ -64,7 +64,7 @@ export function SiteHeader() {
           {capitalize(useLocation().pathname.substring(1))}
         </h1>
         <div className="ml-auto flex items-center">
-          <Button className="rounded-full py-2 px-4">Add sale</Button>
+          <Button onClick={() => navigate("/shopkeeper/sales/new")} className="rounded-full py-2 px-4">Add sale</Button>
           <Separator
             orientation="vertical"
             className="mx-2 data-[orientation=vertical]:h-4"

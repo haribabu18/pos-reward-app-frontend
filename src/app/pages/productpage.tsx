@@ -92,7 +92,6 @@ interface ProductFormData {
   store: string;
   name: string;
   price: number;
-  stockQuantity: number;
 }
 
 interface EditProductFormData {
@@ -100,14 +99,13 @@ interface EditProductFormData {
   store: string;
   name: string;
   price: number;
-  stockQuantity: number;
 }
 
 interface Product {
   id: number;
+  sku: string;
   name: string;
   price: number;
-  stockQuantity: number;
 }
 interface Summary {
   totalProducts: String;
@@ -215,7 +213,6 @@ const Products: React.FC = () => {
     store: localStorage.getItem("store") || "",
     name: "",
     price: 0,
-    stockQuantity: 1,
   }); // Initial form data
 
   const [editFormdata, setEditFormdata] = useState<EditProductFormData>({
@@ -223,7 +220,6 @@ const Products: React.FC = () => {
     store: localStorage.getItem("store") || "",
     name: "",
     price: 0,
-    stockQuantity: 0,
   }); // Initial form data
 
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -289,9 +285,9 @@ const Products: React.FC = () => {
         cell: ({ row }) => <div>₹{Math.round(row.getValue("price"))}</div>,
       },
       {
-        accessorKey: "stockQuantity",
-        header: "Stock",
-        cell: ({ row }) => <div>{row.getValue("stockQuantity")} U</div>,
+        accessorKey: "sku",
+        header: "SKU",
+        cell: ({ row }) => <div>{row.getValue("sku")}</div>,
       },
       {
         id: "actions",
@@ -327,7 +323,7 @@ const Products: React.FC = () => {
     try {
       const data = await deleteProduct(id);
       console.log("Product deleted:", data);
-      fetchProducts();
+      await loadProducts();
     } catch (error) {
       console.error("Error deleting product:", error);
     }
@@ -363,10 +359,6 @@ const Products: React.FC = () => {
       console.log("Price must be a positive number.");
       return false;
     }
-    if (formdata.stockQuantity <= 0) {
-      console.log("Stock must be a positive number.");
-      return false;
-    }
     return true;
   }
 
@@ -393,7 +385,6 @@ const Products: React.FC = () => {
       store: product.store,
       name: product.name,
       price: product.price,
-      stockQuantity: product.stockQuantity,
     });
     setIsEditDialogOpen(true);
   }
@@ -405,7 +396,6 @@ const Products: React.FC = () => {
         store: editFormdata.store,
         name: editFormdata.name,
         price: editFormdata.price,
-        stockQuantity: editFormdata.stockQuantity,
       }; // Initial form data
       console.log("updating data : " + data);
       const response = await updateProduct(id, data);
@@ -602,7 +592,7 @@ const Products: React.FC = () => {
                 <SelectContent>
                   <SelectItem value="name">Name</SelectItem>
                   <SelectItem value="price">Price</SelectItem>
-                  <SelectItem value="stockQuantity">Stock</SelectItem>
+                  <SelectItem value="sku">SKU</SelectItem>
                 </SelectContent>
               </Select>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -630,13 +620,6 @@ const Products: React.FC = () => {
                       placeholder="Price"
                       type="number"
                     />
-                    <Input
-                      onChange={handleInputChange}
-                      name="stockQuantity"
-                      value={formdata.stockQuantity}
-                      placeholder="Stock"
-                      type="number"
-                    />
                     <Button onClick={handlesubmitproduct}>Save</Button>
                   </div>
                 </DialogContent>
@@ -644,9 +627,6 @@ const Products: React.FC = () => {
             </div>
       </div>
       <Card>
-        <CardHeader>
-          
-        </CardHeader>
         <CardContent>
           {/* Product Table */}
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -667,13 +647,6 @@ const Products: React.FC = () => {
                   name="price"
                   value={Math.round(editFormdata.price)}
                   placeholder="Price"
-                  type="number"
-                />
-                <Input
-                  onChange={handleEditInputChange}
-                  name="stockQuantity"
-                  value={editFormdata.stockQuantity}
-                  placeholder="Stock"
                   type="number"
                 />
                 <Button onClick={handleUpdateProduct}>Save</Button>

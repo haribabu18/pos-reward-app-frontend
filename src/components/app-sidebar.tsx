@@ -42,27 +42,27 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/dashboard",
+      url: "/shopkeeper/dashboard",
       icon: IconDashboard,
     },
     {
       title: "Products",
-      url: "/products",
+      url: "/shopkeeper/products",
       icon: IconShoppingCart, // Changed to shopping cart icon
     },
     {
       title: "sales",
-      url: "/sales",
+      url: "/shopkeeper/sales",
       icon: IconCoin, // Changed to coin icon for sales
     },
     {
       title: "Customers",
-      url: "/customers",
+      url: "/shopkeeper/customers",
       icon: IconUsers, // Changed to users icon for customers
     },
     {
       title: "Chat",
-      url: "/chat",
+      url: "/shopkeeper/chat",
       icon: IconMessage, // Changed to message icon for chat
     },
   ],

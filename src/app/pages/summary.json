@@ -2,9 +2,9 @@
 {
     "totalProducts": "5,400",
     "inventoryValue": "5,50,000",
-    "inventorytend": 1,
-    "inventorytendvalue" : 50,
-    "productstend": -1,
+    "inventorytend": -1,
+    "inventorytendvalue" : 5,
+    "productstend": 1,
     "productstendvalue" : 20,
     "topSellingProducts": [
       { "name": "Product One", "sold": 100, "stockQuantity": 50 },

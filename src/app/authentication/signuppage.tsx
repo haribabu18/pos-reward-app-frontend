@@ -79,6 +79,7 @@ export default function SignupPage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otpError, setOtpError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
 
   // Progress indicators - simplified and more reliable approach
   const getSteps = () => {
@@ -87,7 +88,7 @@ export default function SignupPage() {
       { name: "accountDetails", label: "Account Details" },
       { name: "verifyOTP", label: "Verification" },
     ];
-    
+
     // Add conditional steps based on user type
     if (userType === "Shopkeeper") {
       baseSteps.push(
@@ -97,12 +98,14 @@ export default function SignupPage() {
     } else {
       baseSteps.push({ name: "termsAndConditions", label: "Terms" });
     }
-    
+
     return baseSteps;
   };
 
   // Get current step index
-  const currentStepIndex = getSteps().findIndex(step => step.name === currentStep);
+  const currentStepIndex = getSteps().findIndex(
+    (step) => step.name === currentStep
+  );
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,7 +115,7 @@ export default function SignupPage() {
 
   // Handle checkbox changes
   const handleCheckboxChange = (name: string, checked: boolean) => {
-    setLastStep((prev) => ({...prev, [name]: checked }));
+    setLastStep((prev) => ({ ...prev, [name]: checked }));
   };
 
   // Handle OTP input changes
@@ -121,7 +124,7 @@ export default function SignupPage() {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
-      
+
       // Auto-focus next input
       if (value !== "" && index < 5) {
         const nextInput = document.getElementById(`otp-${index + 1}`);
@@ -131,7 +134,10 @@ export default function SignupPage() {
   };
 
   // Handle OTP input keydown for backspace navigation
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleOtpKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
     // If backspace is pressed and the current field is empty, focus the previous field
     if (e.key === "Backspace" && otp[index] === "" && index > 0) {
       const prevInput = document.getElementById(`otp-${index - 1}`);
@@ -143,7 +149,11 @@ export default function SignupPage() {
   const handleSendOTP = async () => {
     try {
       const response = await sendSignupOTP(formData.phoneNumber);
-      setCredentials({ ...credentials, username: formData.phoneNumber, password: formData.password });
+      setCredentials({
+        ...credentials,
+        username: formData.phoneNumber,
+        password: formData.password,
+      });
       console.log(response);
       if (response.success) {
         setIsOtpSent(true);
@@ -196,7 +206,7 @@ export default function SignupPage() {
       // This would be replaced with your actual API endpoint
       const response = await axios.post(
         "http://localhost:8081/api/auth/register",
-        {userType, ...formData}
+        { userType, ...formData }
       );
       console.log(response.data.Success);
       if (response.data.Success) {
@@ -217,6 +227,25 @@ export default function SignupPage() {
     }
   };
 
+  const checkUser = async (): Promise<boolean> => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8081/api/auth/phone/" + formData.phoneNumber
+      );
+      console.log(response);
+      if (!response.data.Success) {
+        setCurrentStep("verifyOTP");
+        return true;
+      } else {
+        console.error("User already exists. Please login.");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error fetching", error);
+    }
+    return false;
+  };
+
   // Navigation between steps
   const goToNextStep = () => {
     switch (currentStep) {
@@ -224,8 +253,14 @@ export default function SignupPage() {
         setCurrentStep("accountDetails");
         break;
       case "accountDetails":
-        setCurrentStep("verifyOTP");
-        handleSendOTP();
+        checkUser().then((isValid) => {
+          if (isValid) {
+            handleSendOTP();
+          }
+          else{
+            setPhoneError("User already exists. Please login.");
+          }
+        });
         break;
       case "verifyOTP":
         handleVerifyOTP();
@@ -294,7 +329,7 @@ export default function SignupPage() {
       {/* App header with name only */}
       <div className="w-full max-w-md flex items-center justify-center mb-6">
         <div className="flex items-center">
-        <img src="/logo.svg" alt="App Logo" className="h-8 w-8" />
+          <img src="/logo.svg" alt="App Logo" className="h-8 w-8" />
           <span className="ml-2 font-bold">App Name</span>
         </div>
       </div>
@@ -404,6 +439,12 @@ export default function SignupPage() {
               <CardDescription className="text-center">
                 Please fill your details
               </CardDescription>
+
+              {phoneError && (
+                <p className="text-sm text-destructive text-center">
+                  {phoneError}
+                </p>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -696,7 +737,7 @@ export default function SignupPage() {
           </Button>
         </CardFooter>
       </Card>
-      
+
       {/* Login link at the bottom */}
       <div className="mt-6 text-sm text-center">
         Already have an account?{" "}

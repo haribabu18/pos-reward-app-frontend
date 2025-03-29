@@ -30,6 +30,7 @@ export function NavMain({
   const navigate = useNavigate();
 
   const handleNavigation = (path: string) => {
+    console.log("path", path, location.pathname);
     navigate(path);
   };
 
